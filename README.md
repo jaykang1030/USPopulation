@@ -1,7 +1,7 @@
 # US Population
 
 ## Introduction
-In this project, I use R Shiny App and create a user interface visualization tool to analyze US Census Population data by interactively look through age distribution based on gender. 
+In this project, I use R Shiny App and create a user interface visualization tool to analyze US Census Population data interactively by user selection of state and year.
 
 ## Data - US Census Bureau, Population Division
 
