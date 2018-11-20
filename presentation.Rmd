@@ -1,0 +1,83 @@
+---
+title: "US Population"
+author: "ZHE JIANG"
+date: "11/19/2018"
+output: ioslides_presentation
+font-import: http://fonts.googleapis.com/css?family=Risque
+font-size: "12"
+font-family: 'Risque'
+editor_options: 
+  chunk_output_type: console
+---
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+In this project, I will create a user interactive visualizaion by using shiny app to analyze US population. User can interact with the graph by choosing state from all US 51 states, and selecting year range from 2010 to 2017 to see how population age is distributed in different states by year. 
+
+
+Data contains records from 51 states population with gender, race, and age between 0 to 86 from US Census Bureau, Population Division. Let's load the data and see basic informaiton. 
+
+## Data
+```{r echo = FALSE, cache =  TRUE}
+url = "https://www2.census.gov/programs-surveys/popest/datasets/2010-2017/state/asrh/sc-est2017-alldata6.csv"
+df <- read.csv(url)
+```
+
+```{r echo = FALSE, message = FALSE}
+library(dplyr)
+df$SEX <- ifelse(df$SEX == 0,"TOTAL",ifelse(df$SEX == 1, "Male","Female"))
+df <- df %>% mutate(.,AGE_GROUP = with(.,case_when(
+    (AGE < 10) ~ "0 to 10",
+    (AGE < 20) ~ "10 to 19",
+    (AGE < 30) ~ "20 to 29",
+    (AGE < 40) ~ "30 to 39",
+    (AGE < 50) ~ "40 to 49",
+    (AGE < 60) ~ "50 to 59",
+    (AGE < 70) ~ "60 to 69",
+    TRUE ~ "70 and over"
+)))
+```
+Let' see how large the data is.
+```{r}
+dim(df)
+```
+See all column names of data.
+```{r}
+colnames(df)
+```
+</font>
+
+## Data Selection
+Assume user select Year: 2017 and State: "California"
+```{r}
+user_select_year <- "2017"; user_select_state <- "California"
+```
+Now, let's Query the data.
+```{r, cache = TRUE}
+library(dplyr)
+selected <- df %>% 
+    filter(NAME == user_select_state) %>%
+    group_by(AGE_GROUP,SEX) %>%
+    summarise_at(c(grep(user_select_year, colnames(df), value = TRUE)), 
+                         function(x) round(sum(x)/100000,4)) %>%
+    filter(SEX == "Male" | SEX == "Female") %>%
+    rename(TOTAL = grep(user_select_year, colnames(df), value = TRUE))
+```
+let's visualize the result. 
+
+
+## Visualiztion
+
+```{r echo = FALSE, message = FALSE}
+library(ggplot2)
+ggplot(data = selected, aes(x = AGE_GROUP, y = TOTAL, fill = SEX)) + 
+    geom_bar(stat = "identity") +
+    geom_text(aes(label = TOTAL), position = position_stack(vjust = 0.5)) + 
+    scale_fill_brewer(palette = "Paired") + 
+    coord_flip() + 
+    theme_minimal() + labs(x = "Age in Years", y = "Number of Residents in 100,000", 
+                           title = "California Population by Age and Gender")
+```
