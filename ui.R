@@ -22,8 +22,10 @@ df <- df %>% mutate(.,AGE_GROUP = with(.,case_when(
 
 shinyUI(fluidPage(
     titlePanel('US Population from 2010 to 2017'),
+    
     sidebarPanel(
         selectInput('State', 'Select A State', unique(df$NAME)),
+        
         sliderInput("Year", "Select Year", 2010, 2017, value = 2017)
     ),
     mainPanel(
